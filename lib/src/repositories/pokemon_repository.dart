@@ -1,19 +1,20 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
+
+import '../models/pokemon_model.dart';
 
 class PokemonRepository {
   final client = Dio();
-  getAll() async {
-    final response =
-        await client.get('https://pokeapi.co/api/v2/pokemon?limit=151');
-    final pokemons = response.data['results'] as List<Map<String, dynamic>>;
 
-    const futures = <Future<Response<dynamic>>>[];
-    for (var element in pokemons) {
-      futures.add(client.get('https://pokeapi.co/api/v2/pokemon?limit=151'));
-    }
+  Future<List<PokemonModel>> getAll() async {
+    final response = await client.get(
+        'https://raw.githubusercontent.com/toshiossada/flutter_pokedex/main/assets/pokedex.json');
+    var decodedJson = jsonDecode(response.data);
+    final pokemons = (decodedJson['pokemon'] as List)
+        .map((e) => PokemonModel.fromJson(e))
+        .toList();
 
-    Future.wait(futures).then((List<Response<dynamic>> responses) {
-
-    });
+    return pokemons;
   }
 }
